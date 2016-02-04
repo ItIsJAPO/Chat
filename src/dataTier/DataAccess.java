@@ -22,10 +22,10 @@ public final class DataAccess {
 	/* Constructor */
 	private DataAccess(){
 		try{
-		Class.forName("org.h2.Driver");
+			Class.forName("com.mysql.jdbc.Driver");
 		//Para testeo se hara una base de datos en memoria.
 		//TODO cambiar a servidor embebido para produccion.
-		conn = DriverManager.getConnection("jdbc:h2:~/test","sa","");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/test?user=root&password=root");
 		stat = conn.createStatement();
 		}
 		catch(Exception ex)
@@ -276,7 +276,8 @@ public final class DataAccess {
 	public BanInfo checkBan(String user){
 		//Devuelve cantidad de dias restantes y descripcion.
 		try{
-			String statement = "SELECT top 1 p.Descripcion, DateDiff('day',CURRENT_DATE(),p.fechafin) as Restantes from LOGPENALIZACION p INNER JOIN USUARIOS u on u.User = p.user WHERE p.User='"+user+"' order by Restantes desc";
+			String statement = "SELECT p.Descripcion, DateDiff(CURRENT_DATE(),p.fechafin) as Restantes from LOGPENALIZACION p INNER JOIN USUARIOS u on u.User = p.user WHERE p.User='"
+					+ user + "' order by Restantes desc limit 1";
 			 ResultSet rs = stat.executeQuery(statement);
 			 if(rs.first())
 				 return new BanInfo(rs.getInt("Restantes"),rs.getString("Descripcion"));
@@ -377,7 +378,8 @@ public final class DataAccess {
 	{
 		try{
 			String statement = "INSERT INTO LOGLOGIN VALUES('"+user.getUser()+ "',now()); ";
-			statement += " UPDATE USUARIOS SET Conectado=1 WHERE User='" + user.getUser() + "'; ";
+			stat.execute(statement);
+			statement = " UPDATE USUARIOS SET Conectado=1 WHERE User='" + user.getUser() + "'; ";
 			stat.execute(statement);
 		}
 		catch(Exception ex)

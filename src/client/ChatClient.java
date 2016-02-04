@@ -1,13 +1,5 @@
 package client;
 
-import groups.Grupo;
-import interfaces.cliente.ClienteConversacion;
-import interfaces.cliente.ClienteInicial;
-import interfaces.cliente.UserLogin;
-import interfaces.grupos.ClienteModSalaDeChat;
-import interfaces.tateti.Blackboard;
-import interfaces.tateti.InterfazTateti;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,14 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.swing.DefaultListModel;
 
 import common.FriendStatus;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
-
 import common.Mensaje;
 import common.MensajeChat;
 import common.MensajeConsulta;
@@ -36,11 +24,17 @@ import common.MensajeGrupo;
 import common.MensajeInvitacion;
 import common.MensajeJuego;
 import common.MensajeMovimiento;
-import common.MensajePartida;
 import common.MensajeRespuestaMovimiento;
 import common.MensajeSolicitudGrupo;
 import common.UserMetaData;
 import dataTier.BanInfo;
+import groups.Grupo;
+import interfaces.cliente.ClienteConversacion;
+import interfaces.cliente.ClienteInicial;
+import interfaces.cliente.UserLogin;
+import interfaces.grupos.ClienteModSalaDeChat;
+import interfaces.tateti.Blackboard;
+import interfaces.tateti.InterfazTateti;
 
 public class ChatClient {
 
