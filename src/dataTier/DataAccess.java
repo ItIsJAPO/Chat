@@ -35,7 +35,7 @@ public final class DataAccess {
 			Class.forName("com.mysql.jdbc.Driver");
 			// Para testeo se hara una base de datos en memoria.
 			// TODO cambiar a servidor embebido para produccion.
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/test?user=root&password=root");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/UserCHAT?user=root&password=root");
 			stat = conn.createStatement();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -62,7 +62,7 @@ public final class DataAccess {
 			while (rs.next()) {
 				UserMetaData data = new UserMetaData();
 				data.setUser(rs.getString("User"));
-				data.setPassword(rs.getString("Password"));
+				data.setPassword(rs.getString("Pass"));
 				data.setApyn(rs.getString("Apyn"));
 				data.setMail(rs.getString("Mail"));
 				data.setTelefono(rs.getString("Telefono"));
@@ -86,7 +86,7 @@ public final class DataAccess {
 	public void insertUser(UserMetaData user) {
 		try {
 			PreparedStatement ps = conn.prepareStatement(
-					"INSERT INTO USUARIOS(User,Password,Mail,Apyn,Telefono,FechaNacimiento,FechaAlta,Conectado) VALUES(?,?,?,?,?,?,?,?)");
+					"INSERT INTO USUARIOS(User,Pass,Mail,Apyn,Telefono,FechaNacimiento,FechaAlta,Conectado) VALUES(?,?,?,?,?,?,?,?)");
 			ps.setString(1, user.getUser());
 			ps.setString(2, user.getPassword());
 			ps.setString(3, user.getMail());
@@ -107,7 +107,7 @@ public final class DataAccess {
 	public void modifyUser(UserMetaData user) {
 		try {
 			PreparedStatement ps = conn.prepareStatement(
-					"UPDATE USUARIOS SET Password=?, Mail=?, Apyn=?,Telefono=?, FechaNacimiento=?, Conectado=? WHERE User=?");
+					"UPDATE USUARIOS SET Pass=?, Mail=?, Apyn=?,Telefono=?, FechaNacimiento=?, Conectado=? WHERE User=?");
 			ps.setString(1, user.getPassword());
 			ps.setString(2, user.getMail());
 			ps.setString(3, user.getApyn());
@@ -137,7 +137,7 @@ public final class DataAccess {
 	 */
 	public void blanquearClave(String user, String password) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("UPDATE USUARIOS SET Password = ? WHERE User = ?");
+			PreparedStatement ps = conn.prepareStatement("UPDATE USUARIOS SET Pass = ? WHERE User = ?");
 			ps.setString(1, password);
 			ps.setString(2, user);
 			ps.execute();
@@ -189,7 +189,7 @@ public final class DataAccess {
 			if (rs.next()) {
 				data = new UserMetaData();
 				data.setUser(rs.getString("User"));
-				data.setPassword(rs.getString("Password"));
+				data.setPassword(rs.getString("Pass"));
 				data.setApyn(rs.getString("Apyn"));
 				data.setMail(rs.getString("Mail"));
 				data.setTelefono(rs.getString("Telefono"));
@@ -269,7 +269,7 @@ public final class DataAccess {
 
 	public boolean checkUser(UserMetaData user) {
 		try {
-			String statement = "SELECT 1 FROM USUARIOS WHERE User='" + user.getUser() + "' and Password='"
+			String statement = "SELECT 1 FROM USUARIOS WHERE User='" + user.getUser() + "' and Pass='"
 					+ user.getPassword() + "'";
 			return stat.executeQuery(statement).first();
 		} catch (Exception ex) {
