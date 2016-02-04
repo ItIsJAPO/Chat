@@ -1,9 +1,16 @@
 package common;
 
-import interfaces.tateti.InterfazTateti;
-
 import java.io.Serializable;
 
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * Archivo BEAN para el intercambio de datos de partida.
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
 public class MensajePartida implements Serializable {
 
 	private static final long serialVersionUID = 47158508574929960L;

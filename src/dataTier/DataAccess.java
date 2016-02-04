@@ -13,46 +13,53 @@ import java.util.List;
 import common.FriendStatus;
 import common.UserMetaData;
 
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * Aqui se hace la conexion a la base de datos. Aqui se puede hacer el cambio
+ * rapidamente de motores cuidando las sentencias.
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
 public final class DataAccess {
 
 	private static DataAccess dataAccessInstance;
 	private static Connection conn;
 	private static Statement stat;
-	
+
 	/* Constructor */
-	private DataAccess(){
-		try{
+	private DataAccess() {
+		try {
 			Class.forName("com.mysql.jdbc.Driver");
-		//Para testeo se hara una base de datos en memoria.
-		//TODO cambiar a servidor embebido para produccion.
+			// Para testeo se hara una base de datos en memoria.
+			// TODO cambiar a servidor embebido para produccion.
 			conn = DriverManager.getConnection("jdbc:mysql://localhost/test?user=root&password=root");
-		stat = conn.createStatement();
-		}
-		catch(Exception ex)
-		{
+			stat = conn.createStatement();
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	public static DataAccess getInstance(){
-		if(dataAccessInstance==null)
+
+	public static DataAccess getInstance() {
+		if (dataAccessInstance == null)
 			dataAccessInstance = new DataAccess();
 		return dataAccessInstance;
 	}
-	
-	//----------
+
+	// ----------
 	// Metodos
-	//----------
+	// ----------
 	/*
-	 * Obtiene todos los usuarios
-	 * ***TESTEADA***
+	 * Obtiene todos los usuarios ***TESTEADA***
 	 */
 	public List<UserMetaData> getAllUsers() {
 		List<UserMetaData> listaUsuarios = null;
 		try {
-			ResultSet rs =  stat.executeQuery("SELECT * FROM USUARIOS");
+			ResultSet rs = stat.executeQuery("SELECT * FROM USUARIOS");
 			listaUsuarios = new ArrayList<UserMetaData>();
-			while(rs.next()) {
+			while (rs.next()) {
 				UserMetaData data = new UserMetaData();
 				data.setUser(rs.getString("User"));
 				data.setPassword(rs.getString("Password"));
@@ -61,7 +68,7 @@ public final class DataAccess {
 				data.setTelefono(rs.getString("Telefono"));
 				data.setFechaAlta(rs.getDate("FechaAlta"));
 				data.setFechaNacimiento(rs.getDate("FechaNacimiento"));
-				if(rs.getBoolean("Conectado")==true)
+				if (rs.getBoolean("Conectado") == true)
 					data.setConectado(1);
 				else
 					data.setConectado(0);
@@ -74,17 +81,17 @@ public final class DataAccess {
 	}
 
 	/*
-	 * Inserta usuarios a la base de datos
-	 * ***TESTEADA***
+	 * Inserta usuarios a la base de datos ***TESTEADA***
 	 */
 	public void insertUser(UserMetaData user) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("INSERT INTO USUARIOS(User,Password,Mail,Apyn,Telefono,FechaNacimiento,FechaAlta,Conectado) VALUES(?,?,?,?,?,?,?,?)");
+			PreparedStatement ps = conn.prepareStatement(
+					"INSERT INTO USUARIOS(User,Password,Mail,Apyn,Telefono,FechaNacimiento,FechaAlta,Conectado) VALUES(?,?,?,?,?,?,?,?)");
 			ps.setString(1, user.getUser());
 			ps.setString(2, user.getPassword());
 			ps.setString(3, user.getMail());
 			ps.setString(4, user.getApyn());
-			ps.setString(5,user.getTelefono());
+			ps.setString(5, user.getTelefono());
 			ps.setDate(6, new Date(user.getFechaNacimiento().getTime()));
 			ps.setDate(7, new Date(user.getFechaAlta().getTime()));
 			ps.setInt(8, user.getConectado());
@@ -99,11 +106,12 @@ public final class DataAccess {
 	 */
 	public void modifyUser(UserMetaData user) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("UPDATE USUARIOS SET Password=?, Mail=?, Apyn=?,Telefono=?, FechaNacimiento=?, Conectado=? WHERE User=?");
+			PreparedStatement ps = conn.prepareStatement(
+					"UPDATE USUARIOS SET Password=?, Mail=?, Apyn=?,Telefono=?, FechaNacimiento=?, Conectado=? WHERE User=?");
 			ps.setString(1, user.getPassword());
 			ps.setString(2, user.getMail());
 			ps.setString(3, user.getApyn());
-			ps.setString(4,user.getTelefono());
+			ps.setString(4, user.getTelefono());
 			ps.setDate(5, new Date(user.getFechaNacimiento().getTime()));
 			ps.setInt(6, user.getConectado());
 			ps.setString(7, user.getUser());
@@ -112,16 +120,14 @@ public final class DataAccess {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	/*
 	 * Borra usuarios
 	 */
 	public void deleteUser(UserMetaData user) {
-		try{
-			stat.execute("DELETE FROM USUARIOS WHERE User="+user.getUser());
-		}
-		catch(Exception ex)
-		{
+		try {
+			stat.execute("DELETE FROM USUARIOS WHERE User=" + user.getUser());
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
@@ -145,7 +151,8 @@ public final class DataAccess {
 	 */
 	public void penalizar(String user, String motivo, long fechaFin) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("INSERT INTO LogPenalizacion (User,Descripcion,FechaFin) VALUES(?,?,?)");
+			PreparedStatement ps = conn
+					.prepareStatement("INSERT INTO LogPenalizacion (User,Descripcion,FechaFin) VALUES(?,?,?)");
 			ps.setString(1, user);
 			ps.setString(2, motivo);
 			ps.setDate(3, new Date(fechaFin));
@@ -206,11 +213,10 @@ public final class DataAccess {
 		List<String> listaUsuarios = null;
 		try {
 			ResultSet rs = stat.executeQuery("SELECT User FROM USUARIOS WHERE Conectado=1 "
-					+" AND (UPPER(User) like '%" + textoBusqueda.toUpperCase() 
-					+"%' or UPPER(Apyn) like '%" + textoBusqueda.toUpperCase()
-					+"%' or UPPER(Mail) like '%" + textoBusqueda.toUpperCase() +"%')");
+					+ " AND (UPPER(User) like '%" + textoBusqueda.toUpperCase() + "%' or UPPER(Apyn) like '%"
+					+ textoBusqueda.toUpperCase() + "%' or UPPER(Mail) like '%" + textoBusqueda.toUpperCase() + "%')");
 			listaUsuarios = new ArrayList<String>();
-			while(rs.next())
+			while (rs.next())
 				listaUsuarios.add(rs.getString("User"));
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -226,8 +232,9 @@ public final class DataAccess {
 			ArrayList<FriendStatus> friendList = new ArrayList<FriendStatus>();
 			ResultSet rSet;
 
-			String statement = "SELECT U1.User,Conectado FROM USUARIOS U1 INNER JOIN (SELECT User1 as User FROM AMIGOS WHERE User2='" +user.getUser()+"'"
-					+ "UNION SELECT User2 as User FROM AMIGOS WHERE User1='" +user.getUser() +"') AS U2 ON U1.User= U2.User ";
+			String statement = "SELECT U1.User,Conectado FROM USUARIOS U1 INNER JOIN (SELECT User1 as User FROM AMIGOS WHERE User2='"
+					+ user.getUser() + "'" + "UNION SELECT User2 as User FROM AMIGOS WHERE User1='" + user.getUser()
+					+ "') AS U2 ON U1.User= U2.User ";
 			rSet = stat.executeQuery(statement);
 
 			while (rSet.next())
@@ -246,11 +253,12 @@ public final class DataAccess {
 	public List<String> getLoginHistory(String user) {
 		List<String> listaLogin = null;
 		try {
-			//TODO reveer query
-			//stat.executeQuery("SELECT * FROM LOGLOGIN WHERE User ='" + user + "' AND DATEADD(day,15,FECHAHORAINICIO)");
+			// TODO reveer query
+			// stat.executeQuery("SELECT * FROM LOGLOGIN WHERE User ='" + user +
+			// "' AND DATEADD(day,15,FECHAHORAINICIO)");
 			ResultSet rSet = stat.executeQuery("SELECT * FROM LOGLOGIN WHERE User ='" + user + "'");
 			listaLogin = new ArrayList<String>();
-			while(rSet.next()) {
+			while (rSet.next()) {
 				listaLogin.add(rSet.getString("FechaHoraInicio"));
 			}
 		} catch (Exception ex) {
@@ -259,31 +267,27 @@ public final class DataAccess {
 		return listaLogin;
 	}
 
-	public boolean checkUser(UserMetaData user){
-		try{
-			String statement = "SELECT 1 FROM USUARIOS WHERE User='"+ user.getUser()
-					+"' and Password='"+ user.getPassword() +"'";
+	public boolean checkUser(UserMetaData user) {
+		try {
+			String statement = "SELECT 1 FROM USUARIOS WHERE User='" + user.getUser() + "' and Password='"
+					+ user.getPassword() + "'";
 			return stat.executeQuery(statement).first();
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		
+
 		return false;
 	}
-	
-	public BanInfo checkBan(String user){
-		//Devuelve cantidad de dias restantes y descripcion.
-		try{
+
+	public BanInfo checkBan(String user) {
+		// Devuelve cantidad de dias restantes y descripcion.
+		try {
 			String statement = "SELECT p.Descripcion, DateDiff(CURRENT_DATE(),p.fechafin) as Restantes from LOGPENALIZACION p INNER JOIN USUARIOS u on u.User = p.user WHERE p.User='"
 					+ user + "' order by Restantes desc limit 1";
-			 ResultSet rs = stat.executeQuery(statement);
-			 if(rs.first())
-				 return new BanInfo(rs.getInt("Restantes"),rs.getString("Descripcion"));
-		}
-		catch(Exception ex)
-		{
+			ResultSet rs = stat.executeQuery(statement);
+			if (rs.first())
+				return new BanInfo(rs.getInt("Restantes"), rs.getString("Descripcion"));
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		return null;
@@ -300,101 +304,81 @@ public final class DataAccess {
 		}
 	}
 
-	public void addUserToPuntaje(UserMetaData user)
-	{
-		try{
-			String statement = "INSERT INTO Puntaje VALUES('"+user.getUser()+"',0,0,0);";
+	public void addUserToPuntaje(UserMetaData user) {
+		try {
+			String statement = "INSERT INTO Puntaje VALUES('" + user.getUser() + "',0,0,0);";
 			stat.execute(statement);
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	public void addVictory(UserMetaData user)
-	{
-		try{
-			String statement = "UPDATE Puntaje SET GANADOS = (SELECT GANADOS+1 FROM PUNTAJE WHERE USER ='"+user.getUser()+"') WHERE USER ='"+user.getUser()+"'";
+
+	public void addVictory(UserMetaData user) {
+		try {
+			String statement = "UPDATE Puntaje SET GANADOS = (SELECT GANADOS+1 FROM PUNTAJE WHERE USER ='"
+					+ user.getUser() + "') WHERE USER ='" + user.getUser() + "'";
 			stat.execute(statement);
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	public void addDraw(UserMetaData user)
-	{
-		try{
-			String statement = "UPDATE Puntaje SET EMPATADOS =(SELECT EMPATADOS+1 FROM PUNTAJE WHERE USER='"+user.getUser()+"') WHERE USER ='"+user.getUser()+"'";
+
+	public void addDraw(UserMetaData user) {
+		try {
+			String statement = "UPDATE Puntaje SET EMPATADOS =(SELECT EMPATADOS+1 FROM PUNTAJE WHERE USER='"
+					+ user.getUser() + "') WHERE USER ='" + user.getUser() + "'";
 			stat.execute(statement);
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	public void addDefeat(UserMetaData user)
-	{
-		try{
-			String statement = "UPDATE Puntaje SET PERDIDOS = (SELECT PERDIDOS+1 FROM PUNTAJE WHERE USER='"+user.getUser()+"') WHERE USER = '"+user.getUser()+"'";
+
+	public void addDefeat(UserMetaData user) {
+		try {
+			String statement = "UPDATE Puntaje SET PERDIDOS = (SELECT PERDIDOS+1 FROM PUNTAJE WHERE USER='"
+					+ user.getUser() + "') WHERE USER = '" + user.getUser() + "'";
 			stat.execute(statement);
-			}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	public ResultSet getPuntajes()
-	{
-		try{
-			String statement ="SELECT * FROM PUNTAJE";
+
+	public ResultSet getPuntajes() {
+		try {
+			String statement = "SELECT * FROM PUNTAJE";
 			return stat.executeQuery(statement);
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			return null;
-		}
-	}
-	
-	public ResultSet getPuntajeByUser(UserMetaData user)
-	{
-		try{
-			String statement = "SELECT * FROM PUNTAJE WHERE USER ='"+user.getUser()+"'";
-			return stat.executeQuery(statement);
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			return null;
 		}
 	}
 
-	public void insertLogLogin(UserMetaData user)
-	{
-		try{
-			String statement = "INSERT INTO LOGLOGIN VALUES('"+user.getUser()+ "',now()); ";
+	public ResultSet getPuntajeByUser(UserMetaData user) {
+		try {
+			String statement = "SELECT * FROM PUNTAJE WHERE USER ='" + user.getUser() + "'";
+			return stat.executeQuery(statement);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
+
+	public void insertLogLogin(UserMetaData user) {
+		try {
+			String statement = "INSERT INTO LOGLOGIN VALUES('" + user.getUser() + "',now()); ";
 			stat.execute(statement);
 			statement = " UPDATE USUARIOS SET Conectado=1 WHERE User='" + user.getUser() + "'; ";
 			stat.execute(statement);
-		}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
 
-	public void limpiarConectados(){ 
-		try{
+	public void limpiarConectados() {
+		try {
 			String statement = "UPDATE USUARIOS SET CONECTADO = FALSE";
 			stat.execute(statement);
-			}
-		catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}

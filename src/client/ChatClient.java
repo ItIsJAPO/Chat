@@ -36,6 +36,15 @@ import interfaces.grupos.ClienteModSalaDeChat;
 import interfaces.tateti.Blackboard;
 import interfaces.tateti.InterfazTateti;
 
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * Contiene las colecciones y metodos necesarias para el cliente.
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
 public class ChatClient {
 
 	// Config
@@ -45,7 +54,7 @@ public class ChatClient {
 	// Negrada
 	private BanInfo banInfo;
 	private String username;
-	
+
 	// Conexion / Auxiliar
 	private ObjectInputStream entrada;
 	private ObjectOutputStream salida;
@@ -66,7 +75,7 @@ public class ChatClient {
 	private Map<String, ClienteModSalaDeChat> mapaGrupos;
 	private Map<String, InterfazTateti> mapaTaTeTi;
 	private Map<String, Blackboard> mapaPizarra;
-	
+
 	/* Constructor */
 	private ChatClient() {
 		try {
@@ -77,7 +86,7 @@ public class ChatClient {
 			entrada = new ObjectInputStream(socket.getInputStream());
 			new ListenFromServer().start();
 			mapaPizarra = new HashMap<String, Blackboard>();
-			banInfo = new BanInfo(0,"");
+			banInfo = new BanInfo(0, "");
 			chatClientInstance = this;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -144,9 +153,9 @@ public class ChatClient {
 		Mensaje msg = new Mensaje(Mensaje.OBTENER_USUARIO, usuarioVacio.getUser());
 		try {
 			enviarAlServer(msg);
-			synchronized(mapMensajes) {
+			synchronized (mapMensajes) {
 				mapMensajes.wait();
-				return (UserMetaData)mapMensajes.remove(Mensaje.OBTENER_USUARIO);
+				return (UserMetaData) mapMensajes.remove(Mensaje.OBTENER_USUARIO);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -163,25 +172,26 @@ public class ChatClient {
 		Mensaje msg = new Mensaje(Mensaje.LOG_IN, userData);
 		try {
 			this.enviarAlServer(msg);
-			synchronized(mapMensajes){
+			synchronized (mapMensajes) {
 				mapMensajes.wait();
-				msg = (Mensaje)mapMensajes.remove(Mensaje.LOG_IN);
+				msg = (Mensaje) mapMensajes.remove(Mensaje.LOG_IN);
 			}
-			if (msg.getId()==Mensaje.ACCEPTED) {
+			if (msg.getId() == Mensaje.ACCEPTED) {
 				// alive.start??
-				amigos = (ArrayList<FriendStatus>)msg.getCuerpo();
+				amigos = (ArrayList<FriendStatus>) msg.getCuerpo();
 				usuarioLogeado = obtenerUsuario(userData);
 				username = usuarioLogeado.getUser();
-				this.mapaConversaciones = new HashMap<String ,ClienteConversacion>();
+				this.mapaConversaciones = new HashMap<String, ClienteConversacion>();
 				this.mapaGrupos = new HashMap<String, ClienteModSalaDeChat>();
 				this.mapaTaTeTi = new HashMap<String, InterfazTateti>();
 				this.frontEnd = new ClienteInicial();
 				return frontEnd;
-			} else if(msg.getId()==Mensaje.BANNED) {
-				banInfo = (BanInfo)msg.getCuerpo();
+			} else if (msg.getId() == Mensaje.BANNED) {
+				banInfo = (BanInfo) msg.getCuerpo();
 				return null;
-			} else if(msg.getId()==Mensaje.USUARIO_CONECTADO) {
-				//TODO devuelve un mensaje de error explicando que el usuario esta conectado
+			} else if (msg.getId() == Mensaje.USUARIO_CONECTADO) {
+				// TODO devuelve un mensaje de error explicando que el usuario
+				// esta conectado
 				return null;
 			}
 		} catch (Exception e) {
@@ -194,9 +204,9 @@ public class ChatClient {
 		Mensaje msg = new Mensaje(Mensaje.VERIFICAR_USUARIO, nombre);
 		try {
 			enviarAlServer(msg);
-			synchronized(mapMensajes){
+			synchronized (mapMensajes) {
 				mapMensajes.wait();
-				return (Boolean)mapMensajes.remove(Mensaje.VERIFICAR_USUARIO);
+				return (Boolean) mapMensajes.remove(Mensaje.VERIFICAR_USUARIO);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -223,9 +233,9 @@ public class ChatClient {
 		Mensaje msg = new Mensaje(Mensaje.BUSCAR_USUARIO, texto);
 		try {
 			enviarAlServer(msg);
-			synchronized(mapMensajes){
+			synchronized (mapMensajes) {
 				mapMensajes.wait();
-				return (List<String>)mapMensajes.remove(Mensaje.BUSCAR_USUARIO);
+				return (List<String>) mapMensajes.remove(Mensaje.BUSCAR_USUARIO);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -264,6 +274,7 @@ public class ChatClient {
 
 	// Thread de escucha de mensajes del server
 	class ListenFromServer extends Thread {
+		@Override
 		public void run() {
 			mapMensajes = new HashMap<Integer, Object>();
 			while (true) {
@@ -271,46 +282,49 @@ public class ChatClient {
 					// Aca se debe se filtrar segun tipo de mensaje recibido
 					Mensaje msg = (Mensaje) entrada.readObject();
 					if (msg.getId() == Mensaje.ALERTA) {
-						mostrarAlerta((String)msg.getCuerpo());
-					} else if(msg.getId() == Mensaje.MENSAJE_INDIVIDUAL) {
-						MensajeChat msgChat = (MensajeChat)msg.getCuerpo();		
+						mostrarAlerta((String) msg.getCuerpo());
+					} else if (msg.getId() == Mensaje.MENSAJE_INDIVIDUAL) {
+						MensajeChat msgChat = (MensajeChat) msg.getCuerpo();
 						frontEnd.getNuevaConversacion(msgChat.getDestinatario(), msgChat.getTexto());
-					} else if(msg.getId() == Mensaje.INVITAR_USUARIO) {
-						MensajeInvitacion msgInvitacion = (MensajeInvitacion)msg.getCuerpo();		
+					} else if (msg.getId() == Mensaje.INVITAR_USUARIO) {
+						MensajeInvitacion msgInvitacion = (MensajeInvitacion) msg.getCuerpo();
 						frontEnd.mostrarPopUpInvitacion(msgInvitacion);
-					} else if(msg.getId() == Mensaje.CAMBIO_ESTADO) {
-						frontEnd.friendStatusChanged(((FriendStatus)msg.getCuerpo()).getUsername(), ((FriendStatus)msg.getCuerpo()).getEstado());
-					} else if(msg.getId() == Mensaje.INVITACION_JUEGO) {
+					} else if (msg.getId() == Mensaje.CAMBIO_ESTADO) {
+						frontEnd.friendStatusChanged(((FriendStatus) msg.getCuerpo()).getUsername(),
+								((FriendStatus) msg.getCuerpo()).getEstado());
+					} else if (msg.getId() == Mensaje.INVITACION_JUEGO) {
 						frontEnd.mostrarPopUpInvitacionJuego(msg);
-					} else if(msg.getId() == Mensaje.INICIO_PARTIDA) { //Version Nico
-						frontEnd.iniciarTaTeTi((MensajeJuego)msg.getCuerpo());
-					} else if(msg.getId() == Mensaje.CANTIDAD_PARTIDAS_VALIDA) {
+					} else if (msg.getId() == Mensaje.INICIO_PARTIDA) { // Version
+																		// Nico
+						frontEnd.iniciarTaTeTi((MensajeJuego) msg.getCuerpo());
+					} else if (msg.getId() == Mensaje.CANTIDAD_PARTIDAS_VALIDA) {
 						enviarCantidadPartidas(msg);
-					} else if(msg.getId() == Mensaje.ENVIAR_MENSAJE_TATETI) {
-						MensajeChat msgChat = (MensajeChat)msg.getCuerpo();
+					} else if (msg.getId() == Mensaje.ENVIAR_MENSAJE_TATETI) {
+						MensajeChat msgChat = (MensajeChat) msg.getCuerpo();
 						frontEnd.getNuevaConversacionTateti(msgChat.getDestinatario(), msgChat.getTexto());
 					} else if (msg.getId() == Mensaje.MENSAJE_GRUPAL) {
 						MensajeChat msgChat = (MensajeChat) msg.getCuerpo();
-						frontEnd.getNuevaConversacion(Mensaje.MENSAJE_GRUPAL, msgChat.getDestinatario(), msgChat.getTexto());
+						frontEnd.getNuevaConversacion(Mensaje.MENSAJE_GRUPAL, msgChat.getDestinatario(),
+								msgChat.getTexto());
 					} else if (msg.getId() == Mensaje.MENSAJE_GRUPAL_MODERADOR) {
 						MensajeChat msgChat = (MensajeChat) msg.getCuerpo();
 						frontEnd.setNuevoMensajeGrupo(msgChat.getDestinatario(), msgChat.getTexto());
 					} else if (msg.getId() == Mensaje.CERRAR_GRUPO) {
 						MensajeChat msgChat = (MensajeChat) msg.getCuerpo();
 						frontEnd.cerrarGrupo(msgChat.getDestinatario(), msgChat.getTexto());
-					}
- 					else if(msg.getId() == Mensaje.VERIFICACION_MOVIMIENTO) {
+					} else if (msg.getId() == Mensaje.VERIFICACION_MOVIMIENTO) {
 						verificarMovimientoEnPizarra(msg);
-					} else if(msg.getId() == Mensaje.MOVIMIENTO) { //Version Nico
+					} else if (msg.getId() == Mensaje.MOVIMIENTO) { // Version
+																	// Nico
 						actualizarMovimiento(msg);
-					} else if(msg.getId() == Mensaje.ACTUALIZAR_TATETI) {
+					} else if (msg.getId() == Mensaje.ACTUALIZAR_TATETI) {
 						actualizarTateti(msg);
-					} else if(msg.getId() == Mensaje.ABANDONO) {
-						//cierro tateti
-						mapaTaTeTi.remove((String)msg.getCuerpo()).abandono();				
-					} else if(msg.getId() == Mensaje.EMPATE){
+					} else if (msg.getId() == Mensaje.ABANDONO) {
+						// cierro tateti
+						mapaTaTeTi.remove(msg.getCuerpo()).abandono();
+					} else if (msg.getId() == Mensaje.EMPATE) {
 						finalizarPartida(msg);
-					} else if(msg.getId() == Mensaje.GANADOR){
+					} else if (msg.getId() == Mensaje.GANADOR) {
 						finalizarPartida(msg);
 					} else if (msg.getId() == Mensaje.BANNED_GRUPO) {
 						MensajeChat msgChat = (MensajeChat) msg.getCuerpo();
@@ -321,12 +335,12 @@ public class ChatClient {
 					} else if (msg.getId() == Mensaje.SOLICITAR_UNION_GRUPO) {
 						MensajeSolicitudGrupo msgInvitacion = (MensajeSolicitudGrupo) msg.getCuerpo();
 						frontEnd.mostrarPopUpSolicitudGrupo(msgInvitacion);
-					} else if(msg.getId()==Mensaje.AGREGAR_AMIGO_FRIENDLIST) {
-						amigos.add(new FriendStatus((String)msg.getCuerpo(),1));
-					} else if(msg.getId()==Mensaje.PUNTUACION) {
-						frontEnd.mostrarPuntuacion((HashMap<String,Integer>)msg.getCuerpo());
+					} else if (msg.getId() == Mensaje.AGREGAR_AMIGO_FRIENDLIST) {
+						amigos.add(new FriendStatus((String) msg.getCuerpo(), 1));
+					} else if (msg.getId() == Mensaje.PUNTUACION) {
+						frontEnd.mostrarPuntuacion((HashMap<String, Integer>) msg.getCuerpo());
 					} else {
-						synchronized(mapMensajes){
+						synchronized (mapMensajes) {
 							mapMensajes.put(msg.getId(), msg.getCuerpo());
 							mapMensajes.notify();
 						}
@@ -344,29 +358,34 @@ public class ChatClient {
 	public UserMetaData getUsuarioLogeado() {
 		return usuarioLogeado;
 	}
+
 	public ArrayList<FriendStatus> getAmigos() {
 		return amigos;
 	}
+
 	public Map<String, ClienteConversacion> getMapaConversaciones() {
 		return mapaConversaciones;
 	}
+
 	public Map<String, InterfazTateti> getMapaTateti() {
 		return mapaTaTeTi;
 	}
+
 	public Map<String, ClienteModSalaDeChat> getMapaGrupos() {
 		return mapaGrupos;
 	}
+
 	public Map<String, Blackboard> getMapaPizarra() {
 		return mapaPizarra;
 	}
+
 	public BanInfo getBanInfo() {
 		return this.banInfo;
 	}
 
-
 	// Inicio: TATETI
 	// TODO Diego
-	public void invitarAmigoAJugar(String invitado) { //Version Nico
+	public void invitarAmigoAJugar(String invitado) { // Version Nico
 		Mensaje msg = new Mensaje(Mensaje.INVITACION_JUEGO, invitado);
 		enviarAlServer(msg);
 	}
@@ -375,101 +394,105 @@ public class ChatClient {
 		enviarAlServer(msg);
 	}
 
-	public void realizaMovimiento(MensajeMovimiento msgMov){ //Version Nico
-		enviarAlServer(new Mensaje(Mensaje.MOVIMIENTO,msgMov));
+	public void realizaMovimiento(MensajeMovimiento msgMov) { // Version Nico
+		enviarAlServer(new Mensaje(Mensaje.MOVIMIENTO, msgMov));
 	}
-	
-	public void enviarMovimiento(MensajeMovimiento msg) {	//EN DESUSO
-		//enviarAlServer(new Mensaje(Mensaje.MOVIMIENTO,msg));
+
+	public void enviarMovimiento(MensajeMovimiento msg) { // EN DESUSO
+		// enviarAlServer(new Mensaje(Mensaje.MOVIMIENTO,msg));
 	}
 
 	public void verificarMovimientoEnPizarra(Mensaje msg) {
-		/*MensajeMovimiento mm = (MensajeMovimiento)msg.getCuerpo();   EN DESUSO
-		String usuario = mm.getOrigen();
-		String amigo = mm.getDestinatario();
-		/* Muestreo consola 
-		System.out.println(usuarioLogeado.getUser() + " Verificar Movimiento");
-		java.util.Iterator<Entry<String, InterfazTateti>> it =  mapaTaTeTi.entrySet().iterator();
-		while(it.hasNext()){
-			System.out.println(it.next().getKey());
-		}
-		/* ************** 
-		int x = mm.getX();
-		int y = mm.getY();
-		InterfazTateti tateti = mapaTaTeTi.get(amigo);
-		Blackboard pizarra = tateti.getBlackboard();
-		MensajeRespuestaMovimiento mrm = new MensajeRespuestaMovimiento(usuario,amigo,false,x,y,pizarra.nroJugadas);
-		if(pizarra.inspect(x, y, pizarra.nroJugadas))
-			mrm.setValido(true);
-		else
-			mrm.setValido(false);			
-		enviarAlServer(new Mensaje(Mensaje.RESPUESTA_VERIFICACION_MOVIMIENTO,mrm));
-		*/
+		/*
+		 * MensajeMovimiento mm = (MensajeMovimiento)msg.getCuerpo(); EN DESUSO
+		 * String usuario = mm.getOrigen(); String amigo = mm.getDestinatario();
+		 * /* Muestreo consola System.out.println(usuarioLogeado.getUser() +
+		 * " Verificar Movimiento"); java.util.Iterator<Entry<String,
+		 * InterfazTateti>> it = mapaTaTeTi.entrySet().iterator();
+		 * while(it.hasNext()){ System.out.println(it.next().getKey()); } /*
+		 * ************** int x = mm.getX(); int y = mm.getY(); InterfazTateti
+		 * tateti = mapaTaTeTi.get(amigo); Blackboard pizarra =
+		 * tateti.getBlackboard(); MensajeRespuestaMovimiento mrm = new
+		 * MensajeRespuestaMovimiento(usuario,amigo,false,x,y,pizarra.nroJugadas
+		 * ); if(pizarra.inspect(x, y, pizarra.nroJugadas)) mrm.setValido(true);
+		 * else mrm.setValido(false); enviarAlServer(new
+		 * Mensaje(Mensaje.RESPUESTA_VERIFICACION_MOVIMIENTO,mrm));
+		 */
 	}
-	public void actualizarMovimiento(Mensaje msg) {	//Ver Nico
+
+	public void actualizarMovimiento(Mensaje msg) { // Ver Nico
 		MensajeMovimiento msgMov = (MensajeMovimiento) msg.getCuerpo();
 		String rival = msgMov.getOrigen();
 		int x = msgMov.getX();
 		int y = msgMov.getY();
 		InterfazTateti tateti = mapaTaTeTi.get(rival);
-		
-		/* Proceso movimiento del rival */
-		int aux = tateti.movimientoRival(x,y);
 
-		//Envio estado al Server
-			// 1 - Hay Ganador
-			// 0 - Empate 
-			// -1 - No paso nada
+		/* Proceso movimiento del rival */
+		int aux = tateti.movimientoRival(x, y);
+
+		// Envio estado al Server
+		// 1 - Hay Ganador
+		// 0 - Empate
+		// -1 - No paso nada
 		MensajeEstadoJuego mej;
-		if(aux == 0){
+		if (aux == 0) {
 			mej = new MensajeEstadoJuego(true, false, true, rival, username);
-			enviarAlServer(new Mensaje(Mensaje.EMPATE,mej));
-			tateti.finPartida(InterfazTateti.EMPATE,"");
+			enviarAlServer(new Mensaje(Mensaje.EMPATE, mej));
+			tateti.finPartida(InterfazTateti.EMPATE, "");
 		}
-		if(aux == 1){
+		if (aux == 1) {
 			mej = new MensajeEstadoJuego(true, true, false, rival, username);
-			enviarAlServer(new Mensaje(Mensaje.GANADOR,mej));	
+			enviarAlServer(new Mensaje(Mensaje.GANADOR, mej));
 			tateti.finPartida(InterfazTateti.GANADOR, rival);
 		}
 	}
-	
+
 	public void actualizarTateti(Mensaje msg) {
-		MensajeRespuestaMovimiento mrm = (MensajeRespuestaMovimiento)msg.getCuerpo();
+		MensajeRespuestaMovimiento mrm = (MensajeRespuestaMovimiento) msg.getCuerpo();
 		InterfazTateti tateti = ChatClient.getInstance().getMapaTateti().get(mrm.getJugador2());
-																			//DEBERIA SER JUGADOR 2
-																	
-		tateti.actualizarEstadoJuego(mrm.getX(), mrm.getY());	// TODO determinar numero de jugada RespuestaMovimiento debe tener el numero de jugada
+		// DEBERIA SER JUGADOR 2
+
+		tateti.actualizarEstadoJuego(mrm.getX(), mrm.getY()); // TODO determinar
+																// numero de
+																// jugada
+																// RespuestaMovimiento
+																// debe tener el
+																// numero de
+																// jugada
 	}
-	
-	public void enviarCantidadPartidas(Mensaje msg) {	//En Desuso
-		MensajeConsulta mc = (MensajeConsulta)msg.getCuerpo();
+
+	public void enviarCantidadPartidas(Mensaje msg) { // En Desuso
+		MensajeConsulta mc = (MensajeConsulta) msg.getCuerpo();
 		// Pregunto por la cantidad de partidas del cliente
-		if(mapaPizarra == null || mapaPizarra.size() < 3) //getMapaPizarra() == null es cuando ese usuario no ha inicializado ninguna partida
+		if (mapaPizarra == null || mapaPizarra.size() < 3) // getMapaPizarra()
+															// == null es cuando
+															// ese usuario no ha
+															// inicializado
+															// ninguna partida
 			mc.setCantValida(true);
 		else
 			mc.setCantValida(false);
-		enviarAlServer(new Mensaje(Mensaje.RESPUESTA_CONSULTA_PARTIDAS,mc));
+		enviarAlServer(new Mensaje(Mensaje.RESPUESTA_CONSULTA_PARTIDAS, mc));
 	}
 
 	public void enviarMensajeChatTaTeTi(String amigo, String texto) {
-		Mensaje msg = new Mensaje(Mensaje.ENVIAR_MENSAJE_TATETI, new MensajeChat(amigo,texto));
+		Mensaje msg = new Mensaje(Mensaje.ENVIAR_MENSAJE_TATETI, new MensajeChat(amigo, texto));
 		enviarAlServer(msg);
 	}
-	
-	public void finalizarPartida(Mensaje msg){
-		InterfazTateti tateti = ChatClient.getInstance().getMapaTateti().get((String)msg.getCuerpo());
-		if(msg.getId() == Mensaje.EMPATE)
+
+	public void finalizarPartida(Mensaje msg) {
+		InterfazTateti tateti = ChatClient.getInstance().getMapaTateti().get(msg.getCuerpo());
+		if (msg.getId() == Mensaje.EMPATE)
 			tateti.finPartida(InterfazTateti.EMPATE, "");
-		if(msg.getId() == Mensaje.GANADOR)
+		if (msg.getId() == Mensaje.GANADOR)
 			tateti.finPartida(InterfazTateti.GANADOR, username);
 	}
-	
+
 	public void obtenerPuntuacion() {
-		Mensaje msg = new Mensaje(Mensaje.PEDIR_PUNTUACION,this.usuarioLogeado.getUser());
+		Mensaje msg = new Mensaje(Mensaje.PEDIR_PUNTUACION, this.usuarioLogeado.getUser());
 		enviarAlServer(msg);
 	}
 	// Fin: TATETI
-
 
 	// Inicio: GRUPOS
 	public void crearGrupo(Grupo grupo) {
@@ -479,13 +502,15 @@ public class ChatClient {
 	}
 
 	public void cerrarGrupo(String grupo, String mensaje) {
-		Mensaje msg = new Mensaje(Mensaje.CERRAR_GRUPO, new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), mensaje));
+		Mensaje msg = new Mensaje(Mensaje.CERRAR_GRUPO,
+				new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), mensaje));
 		enviarAlServer(msg);
 	}
 
 	public void enviarMensajeGrupo(String grupo, String mensaje) {
 
-		Mensaje msg = new Mensaje(Mensaje.MENSAJE_GRUPAL, new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), mensaje));
+		Mensaje msg = new Mensaje(Mensaje.MENSAJE_GRUPAL,
+				new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), mensaje));
 		enviarAlServer(msg);
 	}
 
@@ -494,20 +519,23 @@ public class ChatClient {
 
 		Mensaje msg = null;
 		if (cod == Mensaje.DISCONNECT_GRUPO) {
-			msg = new Mensaje(Mensaje.MENSAJE_USUARIO_GRUPO, new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), UsuarioDestino, cod));
+			msg = new Mensaje(Mensaje.MENSAJE_USUARIO_GRUPO,
+					new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), UsuarioDestino, cod));
 		} else if (cod == Mensaje.BANNED_GRUPO) {
 			// TODO Setear Bann en la lista de clientes//
-			msg = new Mensaje(Mensaje.MENSAJE_USUARIO_GRUPO, new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), UsuarioDestino, cod));
+			msg = new Mensaje(Mensaje.MENSAJE_USUARIO_GRUPO,
+					new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), UsuarioDestino, cod));
 		} else {
 			// TODO Setear Bann en la lista de clientes//
-			msg = new Mensaje(Mensaje.MENSAJE_USUARIO_GRUPO, new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), UsuarioDestino, cod));
+			msg = new Mensaje(Mensaje.MENSAJE_USUARIO_GRUPO,
+					new MensajeGrupo(grupo, this.usuarioLogeado.getUser(), UsuarioDestino, cod));
 		}
 		enviarAlServer(msg);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<String> actualizarGrupos() {
-		
+
 		Mensaje msg = new Mensaje(Mensaje.OBTENER_GRUPOS, this.usuarioLogeado.getUser());
 		try {
 			enviarAlServer(msg);
@@ -522,7 +550,8 @@ public class ChatClient {
 	}
 
 	public void solicitarUnionGrupo(String grupo) {
-		Mensaje msg = new Mensaje(Mensaje.SOLICITAR_UNION_GRUPO, new MensajeSolicitudGrupo(grupo, this.usuarioLogeado.getUser()));
+		Mensaje msg = new Mensaje(Mensaje.SOLICITAR_UNION_GRUPO,
+				new MensajeSolicitudGrupo(grupo, this.usuarioLogeado.getUser()));
 		try {
 			enviarAlServer(msg);
 		} catch (Exception e) {
@@ -531,7 +560,7 @@ public class ChatClient {
 	}
 
 	public void aceptacionSolicitudUnionGrupo(MensajeSolicitudGrupo mensajeSolicitud) {
-		//entra aca una vez q el moderador acepto la solicitud de adhesion
+		// entra aca una vez q el moderador acepto la solicitud de adhesion
 		Mensaje msg = new Mensaje(Mensaje.ACEPTACION_SOLICITUD_UNION_GRUPO, mensajeSolicitud);
 		actualizarListaUsuariosGrupo(mensajeSolicitud);
 		try {
@@ -540,14 +569,14 @@ public class ChatClient {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void actualizarListaUsuariosGrupo(MensajeSolicitudGrupo mensajeSolicitud) {
-		//entra aca una vez q el moderador acepto la solicitud de adhesion
-		ClienteModSalaDeChat front=mapaGrupos.get(mensajeSolicitud.getGrupo());
+		// entra aca una vez q el moderador acepto la solicitud de adhesion
+		ClienteModSalaDeChat front = mapaGrupos.get(mensajeSolicitud.getGrupo());
 		front.insertarLista(mensajeSolicitud.getUser());
 	}
-	
-	public DefaultListModel obtenerListaAmigos(){
+
+	public DefaultListModel obtenerListaAmigos() {
 		return frontEnd.getListaAmigos();
 	}
 	// Fin: GRUPOS

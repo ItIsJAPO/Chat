@@ -2,8 +2,15 @@ package common;
 
 import java.io.Serializable;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * Archivo BEAN para el intercambio de datos de movimiento.
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
 
 public class MensajeMovimiento implements Serializable {
 

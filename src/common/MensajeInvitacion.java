@@ -2,6 +2,16 @@ package common;
 
 import java.io.Serializable;
 
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * Archivo BEAN para el intercambio de datos de invitaciones.
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
+
 public class MensajeInvitacion implements Serializable {
 
 	private static final long serialVersionUID = 47158500574929960L;

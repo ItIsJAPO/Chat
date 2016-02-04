@@ -1,8 +1,17 @@
 package common;
 
+import java.io.Serializable;
+
 import interfaces.tateti.Blackboard;
 
-import java.io.Serializable;
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
 
 public class MensajePizarra implements Serializable {
 	

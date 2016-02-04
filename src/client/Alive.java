@@ -6,11 +6,19 @@ import java.net.Socket;
 
 import common.Mensaje;
 
+/**
+ * Fecha: 28-Enero-2016
+ * 
+ * @author Jose Antonio Pino Ocampo
+ * @autor Juan Carlos Almeyda Cruz
+ *
+ */
 public class Alive extends Thread {
 
 	private Socket socket;
 	private ObjectOutputStream out;
 
+	@Override
 	public void run() {
 		try {
 			out = new ObjectOutputStream(socket.getOutputStream());
@@ -24,7 +32,7 @@ public class Alive extends Thread {
 
 		catch (InterruptedException e2) {
 			e2.printStackTrace();
-			System.err.println("\n Thread Alive: suenio interrumpido.\n");
+			System.err.println("\n Thread Alive: sueño interrumpido.\n");
 		}
 
 		finally {
