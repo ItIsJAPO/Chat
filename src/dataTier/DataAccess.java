@@ -35,7 +35,7 @@ public final class DataAccess {
 			Class.forName("com.mysql.jdbc.Driver");
 			// Para testeo se hara una base de datos en memoria.
 			// TODO cambiar a servidor embebido para produccion.
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/UserCHAT?user=root&password=root");
+			conn = DriverManager.getConnection("jdbc:mysql://10.100.181.131/UserCHAT?user=test&password=test");
 			stat = conn.createStatement();
 		} catch (Exception ex) {
 			ex.printStackTrace();
