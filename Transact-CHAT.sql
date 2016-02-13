@@ -13,7 +13,7 @@
 CREATE DATABASE IF NOT EXISTS UserCHAT;
 USE UserCHAT;
 
-DROP USER 'userandy'@'localhost';
+-- DROP USER 'userandy'@'localhost';
 GRANT ALL ON UserCHAT.* TO userandy@'%' IDENTIFIED BY 'userandy';
 FLUSH PRIVILEGES;
 
@@ -56,4 +56,4 @@ CREATE TABLE USUARIOS (
   Conectado tinytext
 ) ;
 
-SELECT '¡Listo!' as Estado;
+SELECT ' ¡Listo! ' as Estado;
