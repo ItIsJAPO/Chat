@@ -68,13 +68,11 @@ public class CoreCliente extends JDialog {
 		panel.add(lblPort);
 
 		txtip = new JTextField();
-		txtip.setText("192.168.10.10");
 		txtip.setBounds(97, 20, 126, 20);
 		panel.add(txtip);
 		txtip.setColumns(10);
 
 		txtport = new JTextField();
-		txtport.setText("16016");
 		txtport.setColumns(10);
 		txtport.setBounds(97, 45, 126, 20);
 		panel.add(txtport);
