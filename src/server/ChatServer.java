@@ -1,9 +1,5 @@
 package server;
 
-import groups.ClienteGrupo;
-import groups.Grupo;
-import interfaces.servidor.Principal;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,18 +9,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import common.Mensaje;
 import common.MensajeGrupo;
 import common.MensajeSolicitudGrupo;
 import common.UserMetaData;
-
 import dataTier.DataAccess;
+import groups.ClienteGrupo;
+import groups.Grupo;
+import interfaces.servidor.Principal;
 
 public class ChatServer {
 
@@ -42,6 +38,7 @@ public class ChatServer {
 		loadProperties();
 		chatServerInstance = this;
 	}
+
 	public static ChatServer getInstance() {
 		if (chatServerInstance == null)
 			chatServerInstance = new ChatServer();
@@ -52,7 +49,8 @@ public class ChatServer {
 	public static void main(String args[]) {
 		ChatServer.getInstance().go();
 	}
-	private void go() {
+
+	public void go() {
 		/* Lanzamiento de handler de manejo de informacion de GUI */
 		DataAccess.getInstance().limpiarConectados();
 		frontEnd = new Principal();
@@ -60,16 +58,15 @@ public class ChatServer {
 		frontEnd.setVisible(true);
 
 		/* Espera de conexiones */
-		new ConnectionAccepter(port).run();	
-		
+		new ConnectionAccepter(port).run();
+
 		// Los connection listener son lanzados por el Accepter
 		// new ConnectionListener(port, handlerList).run();
 	}
 
-
-	//-----------------
+	// -----------------
 	// Metodos privados
-	//-----------------
+	// -----------------
 	private void loadProperties() {
 		Properties prop = new Properties();
 		try {
@@ -90,20 +87,20 @@ public class ChatServer {
 		}
 	}
 
-
-	//-----------------
+	// -----------------
 	// Metodos publicos para las pantallas del cliente
-	//-----------------
+	// -----------------
 	public List<UserMetaData> obtenerUsuarios() {
 		return DataAccess.getInstance().getAllUsers();
 	}
 
 	public void enviarAlerta(String textoAlerta, String usuarioDestino) {
-		//Se debe tomar q si el usuarioDestino es null entonces es una alerta general
-		if(usuarioDestino == null) {
+		// Se debe tomar q si el usuarioDestino es null entonces es una alerta
+		// general
+		if (usuarioDestino == null) {
 			this.logearEvento("Server :: Alerta general: " + textoAlerta);
-			for(Map.Entry<String, ClientHandler> entry : this.handlerList.entrySet()) {
-				ClientHandler client = (ClientHandler)entry.getValue();
+			for (Map.Entry<String, ClientHandler> entry : this.handlerList.entrySet()) {
+				ClientHandler client = entry.getValue();
 				client.enviarAlerta(textoAlerta);
 			}
 		} else {
@@ -134,7 +131,7 @@ public class ChatServer {
 	}
 
 	public void despenalizar(String nombreUsuario) {
-		if(DataAccess.getInstance().checkBan(nombreUsuario) != null) {
+		if (DataAccess.getInstance().checkBan(nombreUsuario) != null) {
 			DataAccess.getInstance().despenalizar(nombreUsuario);
 			this.logearEvento("Server :: Se despenalizo al usuario: " + nombreUsuario);
 		} else {
@@ -146,12 +143,12 @@ public class ChatServer {
 		this.logearEvento("Server :: Se desconecta al usuario " + nombreUsuario);
 		this.handlerList.get(nombreUsuario).cerrarSesion();
 		actualizarUsuarios();
-	}	
+	}
 
 	public boolean cerrarServer() {
 		this.logearEvento("Server :: Se cierra el servidor");
 		try {
-			for(Map.Entry<String, ClientHandler> entry : this.handlerList.entrySet()) {
+			for (Map.Entry<String, ClientHandler> entry : this.handlerList.entrySet()) {
 				this.handlerList.get(entry.getKey()).cerrarSesion();
 			}
 			return true;
@@ -169,13 +166,12 @@ public class ChatServer {
 		this.frontEnd.actualizarListaUsuarios();
 	}
 
-	//-----------------
+	// -----------------
 	// Getters & Setters
-	//-----------------	
+	// -----------------
 	public HashMap<String, ClientHandler> getHandlerList() {
 		return handlerList;
 	}
-
 
 	// Inicio: GRUPOS
 	public void crearGrupo(MensajeGrupo mensajeGrupo) {
@@ -184,8 +180,9 @@ public class ChatServer {
 		grupoMap.put(grupo.getNombre(), grupo);
 		for (ClienteGrupo usuario : grupo.getUsuarios()) {
 			ClientHandler handler = handlerList.get(usuario.getNombre());
-			if(handler!=null) {
-				handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL, grupo.getNombre(), grupo.getModerador() + " ha creado la sala de chat.");
+			if (handler != null) {
+				handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL, grupo.getNombre(),
+						grupo.getModerador() + " ha creado la sala de chat.");
 			} else {
 				grupo.getUsuarios().remove(usuario.getNombre());
 			}
@@ -197,80 +194,87 @@ public class ChatServer {
 		grupoMap.put(grupo.getNombre(), grupo);
 		for (ClienteGrupo usuario : grupo.getUsuarios()) {
 			ClientHandler handler = handlerList.get(usuario.getNombre());
-			if(handler!=null) {
-				handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL, grupo.getNombre(), mensajeGrupo.getEmisor() + " dice: " + mensajeGrupo.getMensaje());
+			if (handler != null) {
+				handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL, grupo.getNombre(),
+						mensajeGrupo.getEmisor() + " dice: " + mensajeGrupo.getMensaje());
 			} else {
 				grupo.getUsuarios().remove(usuario.getNombre());
 			}
 		}
 		if (!mensajeGrupo.getEmisor().equals(grupo.getModerador())) {
 			ClientHandler handler = handlerList.get(grupo.getModerador());
-			if(handler!=null) {
-				handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL_MODERADOR, grupo.getNombre(), mensajeGrupo.getEmisor() + " dice: " + mensajeGrupo.getMensaje());
+			if (handler != null) {
+				handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL_MODERADOR, grupo.getNombre(),
+						mensajeGrupo.getEmisor() + " dice: " + mensajeGrupo.getMensaje());
 			}
-			
+
 		}
 	}
 
 	public void enviarMensajeUsuarioEnGrupo(MensajeGrupo mensaje) {
-		int i=0;
-		ClientHandler handler=null;
+		int i = 0;
+		ClientHandler handler = null;
 		Grupo grupo = grupoMap.get(mensaje.getNombreGrupo());
 		ClienteGrupo usuario;
 		if (mensaje.getCodigoMensaje() == Mensaje.DISCONNECT_GRUPO) {
-			//TODO meter este while en un metodo esta haciendo lo mismo en varios lugares
-			while(i<grupo.getUsuarios().size() && handler==null){
+			// TODO meter este while en un metodo esta haciendo lo mismo en
+			// varios lugares
+			while (i < grupo.getUsuarios().size() && handler == null) {
 				// Desconecto//
-				usuario=grupo.getUsuarios().get(i);
+				usuario = grupo.getUsuarios().get(i);
 				if (usuario.getNombre().equals(mensaje.getDestinatarioIndividual())) {
 					handler = handlerList.get(usuario.getNombre());
 					List<ClienteGrupo> usuariosEnGrupo = grupo.getUsuarios();
 					usuariosEnGrupo.remove(usuario.getNombre());
-					handler.enviarMensajeChat(Mensaje.CERRAR_GRUPO, grupo.getNombre(), mensaje.getEmisor() + " te ha desconectado del grupo.");
+					handler.enviarMensajeChat(Mensaje.CERRAR_GRUPO, grupo.getNombre(),
+							mensaje.getEmisor() + " te ha desconectado del grupo.");
 				}
 				i++;
 			}
-			
+
 		} else if (mensaje.getCodigoMensaje() == Mensaje.BANNED_GRUPO) {
-			while(i<grupo.getUsuarios().size() && handler==null){
-				usuario=grupo.getUsuarios().get(i);
+			while (i < grupo.getUsuarios().size() && handler == null) {
+				usuario = grupo.getUsuarios().get(i);
 				if (usuario.getNombre().equals(mensaje.getDestinatarioIndividual())) {
 					handler = handlerList.get(usuario.getNombre());
 					List<ClienteGrupo> usuariosEnGrupo = grupo.getUsuarios();
-					handler.enviarMensajeChat(Mensaje.BANNED_GRUPO, grupo.getNombre(), mensaje.getEmisor() + " te ha banneado del Grupo.");
+					handler.enviarMensajeChat(Mensaje.BANNED_GRUPO, grupo.getNombre(),
+							mensaje.getEmisor() + " te ha banneado del Grupo.");
 				}
 				i++;
 			}
-			}
-			else{
-				while(i<grupo.getUsuarios().size() && handler==null){
-					usuario=grupo.getUsuarios().get(i);
-					if (usuario.getNombre().equals(mensaje.getDestinatarioIndividual())) {
-						handler = handlerList.get(usuario.getNombre());
-						handler.enviarMensajeChat(Mensaje.DESBANEAR_GRUPO, grupo.getNombre(), mensaje.getEmisor() + " te ha debanneado del grupo.");
-					}
-					i++;	
+		} else {
+			while (i < grupo.getUsuarios().size() && handler == null) {
+				usuario = grupo.getUsuarios().get(i);
+				if (usuario.getNombre().equals(mensaje.getDestinatarioIndividual())) {
+					handler = handlerList.get(usuario.getNombre());
+					handler.enviarMensajeChat(Mensaje.DESBANEAR_GRUPO, grupo.getNombre(),
+							mensaje.getEmisor() + " te ha debanneado del grupo.");
+				}
+				i++;
 			}
 		}
 	}
 
 	public void solicitarUnionGrupo(MensajeSolicitudGrupo mensaje) {
 		// TODO Verificar que no sea moderador o ya este en el grupo
-		Grupo grupo=grupoMap.get(mensaje.getGrupo());
+		Grupo grupo = grupoMap.get(mensaje.getGrupo());
 		ClientHandler handler = handlerList.get(grupo.getModerador());
 		handler.enviarSolicitudUnionGrupo(Mensaje.SOLICITAR_UNION_GRUPO, mensaje);
 	}
 
 	public void aceptarSolicitudUnionGrupo(MensajeSolicitudGrupo mensaje) {
-		Grupo grupo=grupoMap.get(mensaje.getGrupo());
+		Grupo grupo = grupoMap.get(mensaje.getGrupo());
 		grupo.getUsuarios().add(new ClienteGrupo(mensaje.getUser(), false, true));
-		//envio mensaje de que alguien se ha unido a la sala
+		// envio mensaje de que alguien se ha unido a la sala
 		for (ClienteGrupo usuario : grupo.getUsuarios()) {
 			ClientHandler handler = handlerList.get(usuario.getNombre());
-			handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL, grupo.getNombre(), mensaje.getUser() + " se ha unido a la sala de chat.");
+			handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL, grupo.getNombre(),
+					mensaje.getUser() + " se ha unido a la sala de chat.");
 		}
 		ClientHandler handler = handlerList.get(grupo.getModerador());
-		handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL_MODERADOR, grupo.getNombre(), mensaje.getUser() + " se ha unido a la sala de chat.");
+		handler.enviarMensajeChat(Mensaje.MENSAJE_GRUPAL_MODERADOR, grupo.getNombre(),
+				mensaje.getUser() + " se ha unido a la sala de chat.");
 	}
 
 	public void cerrarGrupo(MensajeGrupo mensajeGrupo) {
@@ -279,84 +283,73 @@ public class ChatServer {
 		grupoMap.put(grupo.getNombre(), grupo);
 		for (ClienteGrupo usuario : grupo.getUsuarios()) {
 			ClientHandler handler = handlerList.get(usuario.getNombre());
-			if(handler!=null) {
-				handler.enviarMensajeChat(Mensaje.CERRAR_GRUPO, grupo.getNombre(), mensajeGrupo.getEmisor() + mensajeGrupo.getMensaje());
+			if (handler != null) {
+				handler.enviarMensajeChat(Mensaje.CERRAR_GRUPO, grupo.getNombre(),
+						mensajeGrupo.getEmisor() + mensajeGrupo.getMensaje());
 			}
 		}
 		grupoMap.remove(grupo.getNombre());
 	}
 
 	public List<String> getGrupos() {
-		List<String> grupos=new ArrayList<String>();
-		for(Grupo grupo : grupoMap.values()) {
+		List<String> grupos = new ArrayList<String>();
+		for (Grupo grupo : grupoMap.values()) {
 			grupos.add(grupo.getNombre());
-		} 
+		}
 		return grupos;
 	}
 	// Fin: GRUPOS
 
-	//Inicio: TATETI
-	
-	public void obtenerPuntuacionPorUsuarioCliente(String nombreUsuario)
-	{
-		try
-		{
-		ResultSet rs = DataAccess.getInstance().getPuntajeByUser(obtenerInfoUsuario(nombreUsuario));
-		HashMap<String,Integer> map = new HashMap();
-		rs.next();
-		map.put("Ganados", rs.getInt("GANADOS"));
-		map.put("Empatados", rs.getInt("EMPATADOS"));
-		map.put("Perdidos", rs.getInt("PERDIDOS"));
-		handlerList.get(nombreUsuario).enviarPuntuacion(map);
-		}
-		catch(Exception ex)
-		{
+	// Inicio: TATETI
+
+	public void obtenerPuntuacionPorUsuarioCliente(String nombreUsuario) {
+		try {
+			ResultSet rs = DataAccess.getInstance().getPuntajeByUser(obtenerInfoUsuario(nombreUsuario));
+			HashMap<String, Integer> map = new HashMap();
+			rs.next();
+			map.put("Ganados", rs.getInt("GANADOS"));
+			map.put("Empatados", rs.getInt("EMPATADOS"));
+			map.put("Perdidos", rs.getInt("PERDIDOS"));
+			handlerList.get(nombreUsuario).enviarPuntuacion(map);
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	public HashMap<String,Integer> obtenerPuntacionPorUsuario(String nombreUsuario)
-	{
-		try
-		{
-		ResultSet rs = DataAccess.getInstance().getPuntajeByUser(obtenerInfoUsuario(nombreUsuario));
-		HashMap<String,Integer> map = new HashMap();
-		rs.next();
-		map.put("Ganados", rs.getInt("GANADOS"));
-		map.put("Empatados", rs.getInt("EMPATADOS"));
-		map.put("Perdidos", rs.getInt("PERDIDOS"));
-		return map;
-		}
-		catch(Exception ex)
-		{
+
+	public HashMap<String, Integer> obtenerPuntacionPorUsuario(String nombreUsuario) {
+		try {
+			ResultSet rs = DataAccess.getInstance().getPuntajeByUser(obtenerInfoUsuario(nombreUsuario));
+			HashMap<String, Integer> map = new HashMap();
+			rs.next();
+			map.put("Ganados", rs.getInt("GANADOS"));
+			map.put("Empatados", rs.getInt("EMPATADOS"));
+			map.put("Perdidos", rs.getInt("PERDIDOS"));
+			return map;
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			return null;
 		}
 	}
-	
-	public ArrayList<ArrayList<String>> obtenerPuntuaciones()
-	{
+
+	public ArrayList<ArrayList<String>> obtenerPuntuaciones() {
 		ArrayList<ArrayList<String>> matPuntuaciones = new ArrayList<ArrayList<String>>();
-		try{
-		ResultSet rs = DataAccess.getInstance().getPuntajes();
-		int cont = 0;
-		while(rs.next())
-		{
-			ArrayList<String> tmp = new ArrayList<String>();
-			tmp.add(rs.getString(1));
-			tmp.add(rs.getString(2));
-			tmp.add(rs.getString(3));
-			tmp.add(rs.getString(4));
-			matPuntuaciones.add(cont,tmp);
-			cont++;
-		}
-		return matPuntuaciones;
-		}
-		catch(Exception ex)
-		{
+		try {
+			ResultSet rs = DataAccess.getInstance().getPuntajes();
+			int cont = 0;
+			while (rs.next()) {
+				ArrayList<String> tmp = new ArrayList<String>();
+				tmp.add(rs.getString(1));
+				tmp.add(rs.getString(2));
+				tmp.add(rs.getString(3));
+				tmp.add(rs.getString(4));
+				matPuntuaciones.add(cont, tmp);
+				cont++;
+			}
+			return matPuntuaciones;
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			return matPuntuaciones;
 		}
 	}
-	//Fin: TATETI
+	// Fin: TATETI
 }

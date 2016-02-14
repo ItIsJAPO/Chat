@@ -11,29 +11,28 @@ import java.util.Properties;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import dataTier.DataAccess;
-import interfaces.cliente.UserLogin;
-import interfaces.servidor.Principal;
+import client.ChatClient;
+import server.ChatServer;
 
-public class core extends JFrame {
+public class Core extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField txtip;
 	private JTextField txtport;
-	private UserLogin frontEndLogIn;
-	private Principal frontEnd;
 	private JPanel panel;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
-					core frame = new core();
+					Core frame = new Core();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -42,7 +41,7 @@ public class core extends JFrame {
 		});
 	}
 
-	public core() {
+	public Core() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 260);
 		contentPane = new JPanel();
@@ -79,6 +78,7 @@ public class core extends JFrame {
 
 		JButton btnEntrar = new JButton("Fijar");
 		btnEntrar.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				abrir();
 			}
@@ -93,9 +93,14 @@ public class core extends JFrame {
 
 		JButton btnCliente = new JButton("Cliente");
 		btnCliente.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				frontEndLogIn = new UserLogin();
-				frontEndLogIn.mostrar();
+				try {
+					ChatClient.getInstance().go();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, e.getMessage(), "Error: ", JOptionPane.ERROR_MESSAGE);
+				}
+
 			}
 		});
 		btnCliente.setBounds(10, 155, 89, 23);
@@ -103,11 +108,9 @@ public class core extends JFrame {
 
 		JButton btnServidor = new JButton("Servidor");
 		btnServidor.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				DataAccess.getInstance().limpiarConectados();
-				frontEnd = new Principal();
-				frontEnd.setResizable(false);
-				frontEnd.setVisible(true);
+				ChatServer.getInstance().go();
 			}
 		});
 		btnServidor.setBounds(325, 155, 89, 23);

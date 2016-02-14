@@ -103,7 +103,7 @@ public class ChatClient {
 		ChatClient.getInstance().go();
 	}
 
-	private void go() {
+	public void go() {
 		/* Inicializo GUI de login */
 		frontEndLogIn = new UserLogin();
 		frontEndLogIn.mostrar();
