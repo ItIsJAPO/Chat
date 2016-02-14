@@ -1,49 +1,50 @@
 package main;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import client.ChatClient;
-import server.ChatServer;
-
-public class Core extends JFrame {
-
+public class CoreServer extends JDialog {
 	private JPanel contentPane;
 	private JTextField txtip;
 	private JTextField txtport;
 	private JPanel panel;
 
+	private final JPanel contentPanel = new JPanel();
+
+	/**
+	 * Launch the application.
+	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Core frame = new Core();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		try {
+			CoreServer dialog = new CoreServer();
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public Core() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 260);
+	/**
+	 * Create the dialog.
+	 */
+	public CoreServer() {
+
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setBounds(100, 100, 450, 292);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -67,11 +68,13 @@ public class Core extends JFrame {
 		panel.add(lblPort);
 
 		txtip = new JTextField();
+		txtip.setText("192.168.10.10");
 		txtip.setBounds(97, 20, 126, 20);
 		panel.add(txtip);
 		txtip.setColumns(10);
 
 		txtport = new JTextField();
+		txtport.setText("16016");
 		txtport.setColumns(10);
 		txtport.setBounds(97, 45, 126, 20);
 		panel.add(txtport);
@@ -88,33 +91,18 @@ public class Core extends JFrame {
 
 		JLabel lblNewLabel = new JLabel(
 				"<html><center> <strong> Alumnos: <strong> <br> José Antonio Pino Ocampo <br> Juan Carlos Almeyda Cruz<br> Pablo Gaddiel Carrillo Guerrero<br> Otilio Guevara Dominguez </center></html>\"");
-		lblNewLabel.setBounds(120, 121, 195, 110);
+		lblNewLabel.setBounds(117, 143, 195, 110);
 		contentPane.add(lblNewLabel);
 
-		JButton btnCliente = new JButton("Cliente");
-		btnCliente.addActionListener(new ActionListener() {
+		JButton btnServer = new JButton("Server");
+		btnServer.addMouseListener(new MouseAdapter() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try {
-					ChatClient.getInstance().go();
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, e.getMessage(), "Error: ", JOptionPane.ERROR_MESSAGE);
-				}
-
+			public void mouseClicked(MouseEvent e) {
+				setVisible(false);
 			}
 		});
-		btnCliente.setBounds(10, 155, 89, 23);
-		contentPane.add(btnCliente);
-
-		JButton btnServidor = new JButton("Servidor");
-		btnServidor.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ChatServer.getInstance().go();
-			}
-		});
-		btnServidor.setBounds(325, 155, 89, 23);
-		contentPane.add(btnServidor);
+		btnServer.setBounds(156, 121, 89, 23);
+		contentPane.add(btnServer);
 	}
 
 	private void abrir() {

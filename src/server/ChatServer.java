@@ -21,6 +21,7 @@ import dataTier.DataAccess;
 import groups.ClienteGrupo;
 import groups.Grupo;
 import interfaces.servidor.Principal;
+import main.CoreServer;
 
 public class ChatServer {
 
@@ -47,6 +48,10 @@ public class ChatServer {
 
 	/* Main */
 	public static void main(String args[]) {
+		CoreServer pucha = new CoreServer();
+		// pucha.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		pucha.setModal(true);
+		pucha.setVisible(true);
 		ChatServer.getInstance().go();
 	}
 
@@ -56,10 +61,8 @@ public class ChatServer {
 		frontEnd = new Principal();
 		frontEnd.setResizable(false);
 		frontEnd.setVisible(true);
-
 		/* Espera de conexiones */
 		new ConnectionAccepter(port).run();
-
 		// Los connection listener son lanzados por el Accepter
 		// new ConnectionListener(port, handlerList).run();
 	}
